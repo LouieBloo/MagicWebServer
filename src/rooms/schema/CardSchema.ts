@@ -16,11 +16,21 @@ export class Card extends Schema {
     rotation: number = 0;
     @type("string")
     location:CardLocation;
-
+    @type("string")
+    owner: string;
     @type("string")
     name: string = "Blacker Lotus";
 
-    constructor() {
+    constructor(owner:string) {
         super();
+    }
+
+    //basically a copy
+    set(card:any){
+        this.id = card.id;
+        this.rotation = card.rotation;
+        this.location = card.location;
+        this.name = card.name;
+        this.owner = card.owner;
     }
 }

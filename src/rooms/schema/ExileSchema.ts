@@ -1,11 +1,9 @@
 import { Schema, MapSchema, type, ArraySchema } from "@colyseus/schema";
-import { Player } from './PlayerSchema';
-import { Card, CardLocation } from './CardSchema';
+import { Card, CardLocation } from "./CardSchema";
 
-export class Hand extends Schema {
 
-    @type("string")
-    name:string;
+
+export class Exile extends Schema {
 
     @type([ Card ])
     cards = new ArraySchema<Card>();
@@ -17,12 +15,8 @@ export class Hand extends Schema {
     addCard(card:Card){
         let newCard:Card = new Card(card.owner);
         newCard.set(card);
-        newCard.location = CardLocation.Hand;
+        newCard.location = CardLocation.Exile;
         this.cards.push(newCard);
-    }
-
-    addMultipleCards(cards:Card[]){
-        this.cards = this.cards.concat(cards);
     }
 
     removeCard(card:Card){

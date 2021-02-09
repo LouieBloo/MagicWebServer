@@ -14,19 +14,26 @@ export class MyRoom extends Room {
     });
 
     this.onMessage("cardPlayed", (client, message) => {
-      console.log("Card Played: ", message)
       this.state.cardPlayed(message)
     })
 
     this.onMessage("cardDraw", (client, message) => {
-      console.log("Card Drew: ", message)
       this.state.cardDraw(client.sessionId, message)
     })
 
     this.onMessage("exileCard", (client, message) => {
-      console.log("exile card: ",message.card)
       this.state.exileCard(client.sessionId,message.card);
     })
+
+    this.onMessage("sendCardToHand", (client, message) => {
+      this.state.sendCardToHand(client.sessionId,message.card);
+    })
+
+    this.onMessage("sendCardToGraveyard", (client, message) => {
+      this.state.sendCardToGraveyard(client.sessionId,message.card);
+    })
+    
+    
   }
 
   onJoin(client: Client, options: any) {
