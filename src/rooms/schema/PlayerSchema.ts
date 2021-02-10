@@ -3,6 +3,8 @@ import { Hand } from './HandSchema';
 import { Card } from "./CardSchema";
 import { Battlefield } from "./BattlefieldSchema";
 
+import {CreateCard} from '../../cards/cardStorage'
+
 export class Player extends Schema {
     @type("string")
     name: string;
@@ -22,6 +24,6 @@ export class Player extends Schema {
     }
 
     cardDraw(message:any){
-        this.hand.addCard(new Card(this.sessionId));
+        this.hand.addCard(CreateCard(this.sessionId,null));
     }
 }

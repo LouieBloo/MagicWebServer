@@ -1,6 +1,7 @@
 import { Schema, type, MapSchema } from "@colyseus/schema";
 import { Player } from './PlayerSchema';
 import { Card, CardLocation } from "./CardSchema";
+import { BattlefieldRowType } from "./BattlefieldRowSchema";
 
 export class GameState extends Schema {
 
@@ -22,45 +23,25 @@ export class GameState extends Schema {
     this.players.get(sessionId).cardDraw(message);
   }
 
-  exileCard(sessionId: string, card: Card) {
+  cardChangeLocation(sessionId: string, card: Card, newLocation:CardLocation,battlefieldRowType:BattlefieldRowType=null){
     if (card.location == CardLocation.Hand) {
       this.players.get(sessionId).hand.removeCard(card);
-      this.players.get(sessionId).battlefield.exile.addCard(card);
     } else if (card.location == CardLocation.Battlefield) {
       this.players.get(sessionId).battlefield.removeCardFromBattlefield(card);
-      this.players.get(sessionId).battlefield.exile.addCard(card);
     } else if (card.location == CardLocation.Graveyard) {
       this.players.get(sessionId).battlefield.graveyard.removeCard(card);
+    } else if (card.location == CardLocation.Exile){
+      this.players.get(sessionId).battlefield.exile.removeCard(card);
+    }
+
+    if (newLocation == CardLocation.Hand) {
+      this.players.get(sessionId).hand.addCard(card);
+    } else if (newLocation == CardLocation.Battlefield) {
+      this.players.get(sessionId).battlefield.addCard(card,battlefieldRowType);
+    } else if (newLocation == CardLocation.Graveyard) {
+      this.players.get(sessionId).battlefield.graveyard.addCard(card);
+    } else if (newLocation == CardLocation.Exile){
       this.players.get(sessionId).battlefield.exile.addCard(card);
-    } else {
-    }
-  }
-
-  sendCardToGraveyard(sessionId: string, card: Card) {
-    if (card.location == CardLocation.Hand) {
-      this.players.get(sessionId).hand.removeCard(card);
-      this.players.get(sessionId).battlefield.graveyard.addCard(card);
-    } else if (card.location == CardLocation.Battlefield) {
-      this.players.get(sessionId).battlefield.removeCardFromBattlefield(card);
-      this.players.get(sessionId).battlefield.graveyard.addCard(card);
-    } else if (card.location == CardLocation.Exile) {
-      this.players.get(sessionId).battlefield.exile.removeCard(card);
-      this.players.get(sessionId).battlefield.graveyard.addCard(card);
-    } else {
-    }
-  }
-
-  sendCardToHand(sessionId: string, card: Card) {
-    if (card.location == CardLocation.Battlefield) {
-      this.players.get(sessionId).battlefield.removeCardFromBattlefield(card);
-      this.players.get(sessionId).hand.addCard(card);
-    } else if (card.location == CardLocation.Graveyard) {
-      this.players.get(sessionId).battlefield.graveyard.removeCard(card);
-      this.players.get(sessionId).hand.addCard(card);
-    } else if (card.location == CardLocation.Exile) {
-      this.players.get(sessionId).battlefield.exile.removeCard(card);
-      this.players.get(sessionId).hand.addCard(card);
-    } else {
     }
   }
 

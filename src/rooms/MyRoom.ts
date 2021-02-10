@@ -14,26 +14,29 @@ export class MyRoom extends Room {
     });
 
     this.onMessage("cardPlayed", (client, message) => {
+      // console.log("play")
       this.state.cardPlayed(message)
     })
 
     this.onMessage("cardDraw", (client, message) => {
+      // console.log("draw")
       this.state.cardDraw(client.sessionId, message)
     })
 
-    this.onMessage("exileCard", (client, message) => {
-      this.state.exileCard(client.sessionId,message.card);
+    this.onMessage("cardChangeLocation", (client, message) => {
+      console.log("location: ",message.newLocation)
+      this.state.cardChangeLocation(client.sessionId, message.card, message.newLocation,message.battlefieldRowType);
     })
 
-    this.onMessage("sendCardToHand", (client, message) => {
-      this.state.sendCardToHand(client.sessionId,message.card);
-    })
+    // this.onMessage("sendCardToHand", (client, message) => {
+    //   this.state.sendCardToHand(client.sessionId,message.card);
+    // })
 
-    this.onMessage("sendCardToGraveyard", (client, message) => {
-      this.state.sendCardToGraveyard(client.sessionId,message.card);
-    })
-    
-    
+    // this.onMessage("sendCardToGraveyard", (client, message) => {
+    //   this.state.sendCardToGraveyard(client.sessionId,message.card);
+    // })
+
+
   }
 
   onJoin(client: Client, options: any) {

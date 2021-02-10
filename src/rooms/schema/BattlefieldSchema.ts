@@ -22,9 +22,9 @@ export class Battlefield extends Schema {
         this.battlefieldRows.set(BattlefieldRowType.Noncreature, new BattlefieldRow(BattlefieldRowType.Noncreature))
     }
 
-    addCard(card:Card){
+    addCard(card:Card,battlefieldRowType:BattlefieldRowType){
         //type changed in row
-        this.battlefieldRows.get(BattlefieldRowType.Creature).addCard(card);
+        this.battlefieldRows.get(battlefieldRowType).addCard(card);
     }
 
     removeCardFromBattlefield(card: Card) {

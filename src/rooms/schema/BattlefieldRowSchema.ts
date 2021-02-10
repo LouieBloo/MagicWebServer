@@ -23,8 +23,10 @@ export class BattlefieldRow extends Schema {
     }
 
     addCard(card:Card){
-        card.location = CardLocation.Battlefield;
-        this.cards.push(card);
+        let newCard:Card = new Card(card.owner);
+        newCard.set(card);
+        newCard.location = CardLocation.Battlefield;
+        this.cards.push(newCard);
     }
 
     removeCard(card:Card):boolean{

@@ -1,6 +1,7 @@
 import { Schema, MapSchema, type, ArraySchema } from "@colyseus/schema";
 import { Player } from './PlayerSchema';
 import { Card, CardLocation } from './CardSchema';
+import {AllCards} from '../../cards/cardStorage'
 
 export class Hand extends Schema {
 
