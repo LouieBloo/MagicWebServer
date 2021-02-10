@@ -32,4 +32,10 @@ export class Battlefield extends Schema {
             element.removeCard(card);
         });
     }
+
+    rotateCard(card:Card){
+        this.battlefieldRows.forEach(element => {
+            element.rotateCard(card);
+        });
+    }
 }

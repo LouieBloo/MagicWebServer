@@ -45,4 +45,8 @@ export class GameState extends Schema {
     }
   }
 
+  cardRotated(sessionId: string, card: Card){
+    this.players.get(sessionId).battlefield.rotateCard(card);
+  }
+
 }

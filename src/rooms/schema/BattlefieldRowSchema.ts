@@ -40,4 +40,13 @@ export class BattlefieldRow extends Schema {
         }
         return false;
     }
+
+    rotateCard(card:Card){
+        let foundObject = this.cards.find(obj=>{
+            return obj.id == card.id;
+        })
+        if(foundObject){
+            foundObject.rotation = foundObject.rotation == 90 ? 0 : 90;
+        }
+    }
 }
