@@ -25,7 +25,7 @@ export class MyRoom extends Room {
 
     this.onMessage("cardChangeLocation", (client, message) => {
       console.log("location: ",message.newLocation)
-      this.state.cardChangeLocation(client.sessionId, message.card, message.newLocation,message.battlefieldRowType);
+      this.state.cardChangeLocation(client.sessionId, message.card, message.newLocation,message.battlefieldRowType,message.owner);
     })
 
     this.onMessage("cardRotated", (client, message) => {

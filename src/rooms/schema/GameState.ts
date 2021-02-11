@@ -23,29 +23,29 @@ export class GameState extends Schema {
     this.players.get(sessionId).cardDraw(message);
   }
 
-  cardChangeLocation(sessionId: string, card: Card, newLocation:CardLocation,battlefieldRowType:BattlefieldRowType=null){
+  cardChangeLocation(sessionId: string, card: Card, newLocation: CardLocation, battlefieldRowType: BattlefieldRowType = null, owner: Player) {
     if (card.location == CardLocation.Hand) {
       this.players.get(sessionId).hand.removeCard(card);
     } else if (card.location == CardLocation.Battlefield) {
       this.players.get(sessionId).battlefield.removeCardFromBattlefield(card);
     } else if (card.location == CardLocation.Graveyard) {
       this.players.get(sessionId).battlefield.graveyard.removeCard(card);
-    } else if (card.location == CardLocation.Exile){
+    } else if (card.location == CardLocation.Exile) {
       this.players.get(sessionId).battlefield.exile.removeCard(card);
     }
 
     if (newLocation == CardLocation.Hand) {
       this.players.get(sessionId).hand.addCard(card);
     } else if (newLocation == CardLocation.Battlefield) {
-      this.players.get(sessionId).battlefield.addCard(card,battlefieldRowType);
+      this.players.get(owner.sessionId).battlefield.addCard(card, battlefieldRowType);
     } else if (newLocation == CardLocation.Graveyard) {
       this.players.get(sessionId).battlefield.graveyard.addCard(card);
-    } else if (newLocation == CardLocation.Exile){
+    } else if (newLocation == CardLocation.Exile) {
       this.players.get(sessionId).battlefield.exile.addCard(card);
     }
   }
 
-  cardRotated(sessionId: string, card: Card){
+  cardRotated(sessionId: string, card: Card) {
     this.players.get(sessionId).battlefield.rotateCard(card);
   }
 
