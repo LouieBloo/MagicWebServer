@@ -1,9 +1,9 @@
 import { Schema, MapSchema, type } from "@colyseus/schema";
 import { Hand } from './HandSchema';
-import { Card } from "./CardSchema";
+import { Card, CardLocation } from "./CardSchema";
 import { Battlefield } from "./BattlefieldSchema";
 
-import {CreateCard} from '../../cards/cardStorage'
+import { CreateCard } from '../../cards/cardStorage'
 
 export class Player extends Schema {
     @type("string")
@@ -15,7 +15,7 @@ export class Player extends Schema {
     hand: Hand = new Hand();
 
     @type(Battlefield)
-    battlefield:Battlefield = new Battlefield();
+    battlefield: Battlefield = new Battlefield();
 
     constructor(sessionId: string, name: string) {
         super();
@@ -23,7 +23,21 @@ export class Player extends Schema {
         this.sessionId = sessionId;
     }
 
-    cardDraw(message:any){
-        this.hand.addCard(CreateCard(this.sessionId,null));
+    cardDraw(message: any) {
+        this.hand.addCard(CreateCard(this.sessionId, null));
     }
+
+    findCard(card: Card): Card {
+        return this.findCardById(card.id);
+    }
+
+    findCardById(id:string):Card{
+        let foundCard = this.hand.findCardById(id);
+        if(foundCard){
+            return foundCard;
+        }
+        return this.battlefield.findCardById(id);
+    }
+
+   
 }

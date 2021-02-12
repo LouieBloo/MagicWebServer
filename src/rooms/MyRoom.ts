@@ -25,12 +25,17 @@ export class MyRoom extends Room {
 
     this.onMessage("cardChangeLocation", (client, message) => {
       console.log("location: ",message.newLocation)
-      this.state.cardChangeLocation(client.sessionId, message.card, message.newLocation,message.battlefieldRowType,message.owner);
+      this.state.cardChangeLocation(client.sessionId, message.card, message.newLocation,message.battlefieldRowType,message.owner ? message.owner.sessionId : null);
     })
 
     this.onMessage("cardRotated", (client, message) => {
       console.log("rotated: ")
       this.state.cardRotated(client.sessionId, message.card);
+    })
+
+    this.onMessage("cardAttached", (client, message) => {
+      console.log("attaching: ")
+      this.state.cardAttached(client.sessionId, message.targetCard,message.sourceCard);
     })
     // this.onMessage("sendCardToHand", (client, message) => {
     //   this.state.sendCardToHand(client.sessionId,message.card);

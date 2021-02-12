@@ -27,15 +27,44 @@ export class Battlefield extends Schema {
         this.battlefieldRows.get(battlefieldRowType).addCard(card);
     }
 
-    removeCardFromBattlefield(card: Card) {
+    removeCardFromBattlefield(card: Card):BattlefieldRowType {
+        let foundType:BattlefieldRowType = null;
         this.battlefieldRows.forEach(element => {
-            element.removeCard(card);
+            if(!foundType){
+                let tempType:BattlefieldRowType = element.removeCard(card);
+                if(tempType){
+                    foundType = tempType;
+                }
+            }
         });
+
+        return foundType;
     }
 
     rotateCard(card:Card){
         this.battlefieldRows.forEach(element => {
             element.rotateCard(card);
         });
+    }
+
+    findCard(card:Card):Card{
+        return this.findCardById(card.id);
+    }
+
+    findCardById(id:string):Card{
+        let foundCard = null;
+        this.battlefieldRows.forEach(row=>{
+            let rowCard = row.findCardById(id);
+            if(rowCard){
+                foundCard  = rowCard;
+            }
+        })
+        if(!foundCard){
+            foundCard = this.graveyard.findCardById(id);
+        }
+        if(!foundCard){
+            foundCard = this.exile.findCardById(id);
+        }
+        return foundCard;
     }
 }

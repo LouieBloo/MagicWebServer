@@ -13,10 +13,9 @@ export class Graveyard extends Schema {
     }
 
     addCard(card:Card){
-        let newCard:Card = new Card(card.owner);
-        newCard.set(card);
-        newCard.location = CardLocation.Graveyard;
-        this.cards.push(newCard);
+        card.location = CardLocation.Graveyard;
+        card.rotation = 0;
+        this.cards.push(card);
     }
 
     removeCard(card:Card){
@@ -27,5 +26,15 @@ export class Graveyard extends Schema {
             let index = this.cards.indexOf(foundObject);
             this.cards.splice(index,1);
         }
+    }
+
+    findCardById(id:string):Card{
+        let foundObject = this.cards.find(obj=>{
+            return obj.id == id;
+        })
+        if(foundObject){
+            return foundObject;
+        }
+        return null;
     }
 }

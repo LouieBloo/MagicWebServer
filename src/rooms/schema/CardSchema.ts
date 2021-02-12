@@ -1,12 +1,13 @@
-import { Schema, MapSchema, type } from "@colyseus/schema";
+import { Schema, MapSchema, type, ArraySchema } from "@colyseus/schema";
 const { v4: uuidv4 } = require('uuid');
 
 export enum CardLocation {
-    Hand="Hand",
-    Battlefield="Battlefield",
-    Graveyard="Graveyard",
-    Exile="Exile",
-    Stack="Stack"
+    Hand = "Hand",
+    Battlefield = "Battlefield",
+    Graveyard = "Graveyard",
+    Exile = "Exile",
+    AttachedToCard = "AttachedToCard",
+    Stack = "Stack"
 }
 export class ImageUris extends Schema {
     @type("string")
@@ -29,40 +30,48 @@ export class Card extends Schema {
     @type("number")
     rotation: number = 0;
     @type("string")
-    location:CardLocation;
+    location: CardLocation;
     @type("string")
     owner: string;
     @type("string")
     name: string;
     @type(ImageUris)
-    image_uris:ImageUris;
+    image_uris: ImageUris;
 
-    constructor(owner:string) {
+    @type([Card])
+    attachedCards = new ArraySchema<Card>();
+    @type("string")
+    attachedToCardId: string;
+
+    constructor(owner: string) {
         super();
+        this.owner = owner;
     }
 
-    //basically a copy
-    set(card:any){
-        this.id = card.id;
-        this.rotation = card.rotation;
-        this.location = card.location;
-        this.name = card.name;
-        this.owner = card.owner;
-        this.disc_id = card.disc_id;
-        this.image_uris = this.mapImageUris(card.image_uris);
-        this.type_line = card.type_line;
-    }
+    // //basically a copy
+    // set(card: any) {
+    //     this.id = card.id;
+    //     this.rotation = card.rotation;
+    //     this.location = card.location;
+    //     this.name = card.name;
+    //     this.owner = card.owner;
+    //     this.disc_id = card.disc_id;
+    //     this.image_uris = this.mapImageUris(card.image_uris);
+    //     this.type_line = card.type_line;
+    //     this.attachedCards = card.attachedCards;
+    //     this.attachedToCardId = card.attachedToCardId;
+    // }
 
-    //basically a copy
-    setFromDisc(card:any){
+    //when loading the card the first time
+    setFromDisc(card: any) {
         this.disc_id = card.id;
         this.name = card.name;
         this.image_uris = this.mapImageUris(card.image_uris);
         this.type_line = card.type_line;
     }
 
-    mapImageUris(image_uris:any):ImageUris{
-        if(!image_uris){console.error("No image uris!");return;}
+    mapImageUris(image_uris: any): ImageUris {
+        if (!image_uris) { console.error("No image uris!"); return; }
         let finalObject = new ImageUris();
         finalObject.small = image_uris.small;
         finalObject.normal = image_uris.normal;
@@ -70,4 +79,36 @@ export class Card extends Schema {
         finalObject.png = image_uris.png;
         return finalObject;
     }
+
+    //asumes card is a real schema not passed in from front end
+    attachCard(card: Card) {
+        card.location = CardLocation.AttachedToCard;
+        card.attachedToCardId = this.id;
+        this.attachedCards.push(card);
+    }
+
+    removeAttachedCard(card: Card) {
+        let foundObject = this.attachedCards.find(obj => {
+            return obj.id == card.id;
+        })
+        if (foundObject) {
+            foundObject.attachedToCardId = null;
+            let index = this.attachedCards.indexOf(foundObject);
+            this.attachedCards.splice(index, 1);
+            return true;
+        }
+    }
+
+    // findCardById(id:string):Card{
+    //     if(this.id == id){
+    //         return this;
+    //     }
+    //     let foundObject = this.attachedCards.find(obj=>{
+    //         return obj.id == id;
+    //     })
+    //     if(foundObject){
+    //         return foundObject;
+    //     }
+    //     return null;
+    // }
 }

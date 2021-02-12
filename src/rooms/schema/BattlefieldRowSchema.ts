@@ -23,22 +23,34 @@ export class BattlefieldRow extends Schema {
     }
 
     addCard(card:Card){
-        let newCard:Card = new Card(card.owner);
-        newCard.set(card);
-        newCard.location = CardLocation.Battlefield;
-        this.cards.push(newCard);
+        card.location = CardLocation.Battlefield;
+        this.cards.push(card);
     }
 
-    removeCard(card:Card):boolean{
+    removeCard(card:Card):BattlefieldRowType{
         let foundObject = this.cards.find(obj=>{
             return obj.id == card.id;
         })
         if(foundObject){
             let index = this.cards.indexOf(foundObject);
             this.cards.splice(index,1);
-            return true;
+            return this.type;
         }
-        return false;
+        return null;
+    }
+
+    findCard(card:Card):Card{
+        return this.findCardById(card.id);
+    }
+
+    findCardById(id:string):Card{
+        let foundObject = this.cards.find(obj=>{
+            return obj.id == id;
+        })
+        if(foundObject){
+            return foundObject;
+        }
+        return null;
     }
 
     rotateCard(card:Card){
