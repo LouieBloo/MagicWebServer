@@ -2,9 +2,13 @@ import { Schema, type, MapSchema } from "@colyseus/schema";
 import { Player } from './PlayerSchema';
 import { Card, CardLocation } from "./CardSchema";
 import { BattlefieldRowType } from "./BattlefieldRowSchema";
-import { GetRealSchemaCard } from "../../cards/cardStorage";
+import { CardStorage } from "../../cards/cardStorage";
+import { Counter, CounterTypes } from "./CounterSchema";
+import { Stack } from "./StackSchema";
 
 export class GameState extends Schema {
+
+  cardStorage:CardStorage = new CardStorage();
 
   @type("string")
   mySynchronizedProperty: string = "Hello world";
@@ -12,8 +16,11 @@ export class GameState extends Schema {
   @type({ map: Player })
   players = new MapSchema<Player>();
 
+  @type(Stack)
+  stack:Stack = new Stack();
+
   createPlayer(sessionId: string, name: string) {
-    this.players.set(sessionId, new Player(sessionId, name));
+    this.players.set(sessionId, new Player(sessionId, name,this.cardStorage));
   }
 
   cardPlayed(message: any) {
@@ -26,7 +33,7 @@ export class GameState extends Schema {
 
   cardChangeLocation(sessionId: string, inputCard: Card, newLocation: CardLocation, battlefieldRowType: BattlefieldRowType = null, owner: string) {
 
-    let card = GetRealSchemaCard(inputCard.id);
+    let card = this.cardStorage.GetRealSchemaCard(inputCard.id);
 
     //when a card is moved if it has attachments we need to track what row type this card was in
     let removedCardType = null;
@@ -39,9 +46,11 @@ export class GameState extends Schema {
     } else if (card.location == CardLocation.Exile) {
       this.players.get(sessionId).battlefield.exile.removeCard(card);
     } else if (card.location == CardLocation.AttachedToCard) {
-      let attachedToCard: Card = this.players.get(sessionId).findCardById(card.attachedToCardId);
+      let attachedToCard: Card = this.cardStorage.GetRealSchemaCard(card.attachedToCardId);
       if (!attachedToCard) { console.error("cant find card by id!");return; }
       attachedToCard.removeAttachedCard(card);
+    } else if(card.location == CardLocation.Stack){
+      this.stack.removeCard(card);
     }
 
     if (newLocation == CardLocation.Hand) {
@@ -52,22 +61,28 @@ export class GameState extends Schema {
       this.players.get(sessionId).battlefield.graveyard.addCard(card);
     } else if (newLocation == CardLocation.Exile) {
       this.players.get(sessionId).battlefield.exile.addCard(card);
+    } else if (newLocation == CardLocation.Stack){
+      this.stack.addCard(card);
     }
 
     //unattach all things from this card if it is leaving the battelfield
     if (card.attachedCards.length > 0 && newLocation != CardLocation.Battlefield) {
       this.unAttachAllCardsFromCard(sessionId, card, removedCardType);
     }
+
+    if(newLocation != CardLocation.Battlefield && newLocation != CardLocation.AttachedToCard && newLocation != CardLocation.Stack){
+      card.wipeCounters();
+    }
   }
 
   cardRotated(sessionId: string, card: Card) {
-    this.players.get(sessionId).battlefield.rotateCard(GetRealSchemaCard(card.id));
+    this.players.get(sessionId).battlefield.rotateCard(this.cardStorage.GetRealSchemaCard(card.id));
   }
 
   cardAttached(sessionId: string, targetCard: Card, sourceCard: Card) {
 
-    let foundRealTargetCard = GetRealSchemaCard(targetCard.id);
-    let foundRealSourceCard = GetRealSchemaCard(sourceCard.id);
+    let foundRealTargetCard = this.cardStorage.GetRealSchemaCard(targetCard.id);
+    let foundRealSourceCard = this.cardStorage.GetRealSchemaCard(sourceCard.id);
     if (!foundRealTargetCard || !foundRealSourceCard) { return; }
 
     if (foundRealTargetCard.location != CardLocation.Battlefield) { console.error("ERROR: cant attach card that is not on battlefield"); return; }
@@ -82,4 +97,8 @@ export class GameState extends Schema {
     })
   }
 
+  createOrModifyCounterOnCard(sessionId: string, targetCard: Card,counterType:CounterTypes,amount:number){
+    let card = this.cardStorage.GetRealSchemaCard(targetCard.id);
+    card.modifyOrCreateCounter(counterType,amount)
+  }
 }

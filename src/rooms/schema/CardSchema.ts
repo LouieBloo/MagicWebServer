@@ -1,4 +1,5 @@
 import { Schema, MapSchema, type, ArraySchema } from "@colyseus/schema";
+import { Counter, CounterTypes } from "./CounterSchema";
 const { v4: uuidv4 } = require('uuid');
 
 export enum CardLocation {
@@ -42,6 +43,9 @@ export class Card extends Schema {
     attachedCards = new ArraySchema<Card>();
     @type("string")
     attachedToCardId: string;
+
+    @type(Counter)
+    counter:Counter;
 
     constructor(owner: string) {
         super();
@@ -97,6 +101,19 @@ export class Card extends Schema {
             this.attachedCards.splice(index, 1);
             return true;
         }
+    }
+
+
+    modifyOrCreateCounter(counterType:CounterTypes,amountToModify:number){
+        if(this.counter && this.counter.type == counterType){
+            this.counter.modifyAmount(amountToModify);
+        }else{
+            this.counter = new Counter(counterType,amountToModify);
+        }
+    }
+
+    wipeCounters(){
+        this.counter = null;
     }
 
     // findCardById(id:string):Card{

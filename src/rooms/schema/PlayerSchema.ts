@@ -3,9 +3,12 @@ import { Hand } from './HandSchema';
 import { Card, CardLocation } from "./CardSchema";
 import { Battlefield } from "./BattlefieldSchema";
 
-import { CreateCard } from '../../cards/cardStorage'
+import { CardStorage } from '../../cards/cardStorage'
 
 export class Player extends Schema {
+
+    cardStorage:CardStorage;
+
     @type("string")
     name: string;
     @type("string")
@@ -17,14 +20,15 @@ export class Player extends Schema {
     @type(Battlefield)
     battlefield: Battlefield = new Battlefield();
 
-    constructor(sessionId: string, name: string) {
+    constructor(sessionId: string, name: string,cardStorage:CardStorage) {
         super();
         this.name = name;
         this.sessionId = sessionId;
+        this.cardStorage = cardStorage;
     }
 
     cardDraw(message: any) {
-        this.hand.addCard(CreateCard(this.sessionId, null));
+        this.hand.addCard(this.cardStorage.CreateCard(this.sessionId, null));
     }
 
     findCard(card: Card): Card {

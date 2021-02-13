@@ -37,6 +37,10 @@ export class MyRoom extends Room {
       console.log("attaching: ")
       this.state.cardAttached(client.sessionId, message.targetCard,message.sourceCard);
     })
+
+    this.onMessage("createOrModifyCounterOnCard", (client, message) => {
+      this.state.createOrModifyCounterOnCard(client.sessionId, message.targetCard,message.counterType,message.amount);
+    })
     // this.onMessage("sendCardToHand", (client, message) => {
     //   this.state.sendCardToHand(client.sessionId,message.card);
     // })
