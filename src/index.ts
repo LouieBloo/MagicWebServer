@@ -4,6 +4,7 @@ import cors from "cors";
 import { Server } from "colyseus";
 import { monitor } from "@colyseus/monitor";
 // import socialRoutes from "@colyseus/social/express"
+require('./models/Models')
 
 import { MyRoom } from "./rooms/MyRoom";
 
@@ -13,7 +14,7 @@ const app = express()
 app.use(cors());
 app.use(express.json())
 
-require('./models/Models')
+
 
 const router = require('./routing/router');
 app.use('/', router);

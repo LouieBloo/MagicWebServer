@@ -115,4 +115,8 @@ export class GameState extends Schema {
   flipCard(sessionId: string, card: Card) {
     this.cardStorage.GetRealSchemaCard(card.id).flip();
   }
+
+  importDeck(sessionId: string, deck: any){
+    this.players.get(sessionId).importDeck(deck);
+  }
 }

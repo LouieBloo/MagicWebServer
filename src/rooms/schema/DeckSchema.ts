@@ -1,5 +1,6 @@
 import { Schema, MapSchema, type, ArraySchema } from "@colyseus/schema";
 import { Card, CardLocation } from "./CardSchema";
+import { CardStorage } from "../../cards/cardStorage";
 
 
 
@@ -8,8 +9,11 @@ export class Deck extends Schema {
     @type([Card])
     cards = new ArraySchema<Card>();
 
-    constructor() {
+    cardStorage: CardStorage;
+
+    constructor(cardStorage: CardStorage) {
         super();
+        this.cardStorage = cardStorage;
     }
 
     //we dont want top modify our cards array because the act of moving a card somwhere
@@ -53,5 +57,21 @@ export class Deck extends Schema {
             return foundObject;
         }
         return null;
+    }
+
+    import = async (sessionId: string, deck: any) => {
+        //let allCards: ArraySchema<Card> = new ArraySchema<Card>();
+        for (let x = 0; x < deck.length; x++) {
+            for (let y = 0; y < deck[x].amount; y++) {
+                let card = await this.cardStorage.CreateCard(sessionId, deck[x].card.id);
+                // card.location = CardLocation.Deck;
+                // card.rotation = 0;
+                //allCards.push(card);
+                this.addCard(card,true);
+            }
+        }
+
+        //console.log(allCards)
+        //this.cards = allCards;
     }
 }

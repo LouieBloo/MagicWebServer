@@ -46,6 +46,10 @@ export class MyRoom extends Room {
       this.state.flipCard(client.sessionId, message.card);
     })
 
+    this.onMessage("importDeck", (client, message) => {
+      this.state.importDeck(client.sessionId, message.deck);
+    })
+
   }
 
   onJoin(client: Client, options: any) {

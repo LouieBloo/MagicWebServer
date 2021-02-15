@@ -12,29 +12,39 @@ module.exports.handler = async (req, res, next) => {
   let errors = [];
 
   for (let x = 0; x < splitDeck.length; x++) {
-    let amount = splitDeck[x].split(/ (.+)/)[0] || "";
+    let targetLine = splitDeck[x];
+    if (!targetLine) {
+      continue;
+    }
+
+    targetLine = targetLine.trim();
+
+    let amount = targetLine.split(/ (.+)/)[0] || "";
     amount = amount.replace(/\D/g, '');
     if (!amount) {
-      errors.push("No amount for: " + splitDeck[x])
+      errors.push("No amount for: " + targetLine)
       continue;
     }
 
-    let cardName = splitDeck[x].split(/ (.+)/)[1];
+    let cardName = targetLine.split(/ (.+)/)[1];
     if (!cardName) {
-      errors.push("No name for: " + splitDeck[x])
+      errors.push("No name for: " + targetLine)
       continue;
     }
-    console.log(amount + ": " + cardName);
+    // console.log(amount + ": " + cardName);
 
-    //let foundCard = await CardModel.findOne({name:cardName});
-    let foundCard = await CardModel.findOne({ $text: { $search: cardName } });
+    let foundCard = await CardModel.findOne({ name: cardName });
+    //let foundCard = await CardModel.findOne({ $text: { $search: cardName } });
 
     if (!foundCard) {
-      errors.push("Couldnt find: " + splitDeck[x])
-      continue;
+      foundCard = await CardModel.findOne({ $text: { $search: "\"" + cardName + "\"" } });
+      if (!foundCard) {
+        errors.push("Couldnt find: " + targetLine)
+        continue;
+      }
     }
 
-    deck.push({card:foundCard,amount:amount})
+    deck.push({ card: foundCard, amount: amount })
 
   }
 

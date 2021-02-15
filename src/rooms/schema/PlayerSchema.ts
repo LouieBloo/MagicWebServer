@@ -5,6 +5,7 @@ import { Battlefield } from "./BattlefieldSchema";
 
 import { CardStorage } from '../../cards/cardStorage'
 import { Deck } from "./DeckSchema";
+import { threadId } from "worker_threads";
 
 export class Player extends Schema {
 
@@ -16,7 +17,7 @@ export class Player extends Schema {
     sessionId: string;
 
     @type(Deck)
-    deck: Deck = new Deck();
+    deck: Deck;
 
     @type(Hand)
     hand: Hand = new Hand();
@@ -29,12 +30,13 @@ export class Player extends Schema {
         this.name = name;
         this.sessionId = sessionId;
         this.cardStorage = cardStorage;
+        this.deck = new Deck(cardStorage)
 
-        this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
-        this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
-        this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
-        this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
-        this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
+        // this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
+        // this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
+        // this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
+        // this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
+        // this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
     }
 
 
@@ -54,5 +56,11 @@ export class Player extends Schema {
         return this.battlefield.findCardById(id);
     }
 
+    importDeck(deck:any){
+        this.deck = new Deck(this.cardStorage);
+        this.hand = new Hand();
+        this.battlefield = new Battlefield();
 
+        this.deck.import(this.sessionId,deck);
+    }
 }

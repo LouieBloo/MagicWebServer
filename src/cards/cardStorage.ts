@@ -2,6 +2,8 @@ import { Card } from "../rooms/schema/CardSchema";
 
 const allCards = require('../../default-cards-20210208220255.json')
 
+const mongoose = require('mongoose');
+const CardModel = mongoose.model('cards');
 
 export class CardStorage {
     loadedCards: Card[] = [];
@@ -15,22 +17,30 @@ export class CardStorage {
         return null;
     }
 
-    CreateCard = (sessionId: string, id: string): Card => {
+    CreateCard = async(sessionId: string, id: string): Promise<Card> => {
         if (id) {
-            return null;
+            return await this.createCardFromId(sessionId, id);
         } else {
-            return this.CreateRandomCard(sessionId);
+            return await this.CreateRandomCard(sessionId);
         }
     }
 
-    CreateRandomCard = (sessionId: string): Card => {
+    private createCardFromId = async(sessionId: string, id: string): Promise<Card> => {
+        let newCard: Card = new Card(sessionId);
+        let cardOnDisc = await this.findCardOnDisc(id);
+        newCard.setFromDisc(cardOnDisc);
+        this.loadedCards.push(newCard);
+        return newCard;
+    }
+
+    private CreateRandomCard = async(sessionId: string): Promise<Card> => {
         let newCard: Card = new Card(sessionId);
         newCard.setFromDisc(allCards[Math.round(Math.random() * allCards.length)]);
         this.loadedCards.push(newCard);
         return newCard;
     }
 
-    findCardByName(name: string): Card {
+    private findCardByName(name: string): Card {
         for (let x = 0; x < allCards.length; x++) {
             if (allCards[x].name.toUpperCase() == name.toUpperCase()) {
                 return allCards[x];
@@ -39,5 +49,11 @@ export class CardStorage {
         return null;
     }
 
+
+    private findCardOnDisc = async (id: string) => {
+        let foundCard = await CardModel.findOne({ id: id });
+        // console.log("found card: ",foundCard);
+        return foundCard;
+    }
 
 }
