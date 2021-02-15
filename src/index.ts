@@ -13,6 +13,13 @@ const app = express()
 app.use(cors());
 app.use(express.json())
 
+require('./models/Models')
+
+const router = require('./routing/router');
+app.use('/', router);
+
+require('./database/main-database').connect();
+
 const server = http.createServer(app);
 const gameServer = new Server({
   server,
@@ -20,6 +27,7 @@ const gameServer = new Server({
 
 // register your room handlers
 gameServer.define('my_room', MyRoom);
+
 
 
 

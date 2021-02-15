@@ -41,14 +41,10 @@ export class MyRoom extends Room {
     this.onMessage("createOrModifyCounterOnCard", (client, message) => {
       this.state.createOrModifyCounterOnCard(client.sessionId, message.targetCard,message.counterType,message.amount);
     })
-    // this.onMessage("sendCardToHand", (client, message) => {
-    //   this.state.sendCardToHand(client.sessionId,message.card);
-    // })
 
-    // this.onMessage("sendCardToGraveyard", (client, message) => {
-    //   this.state.sendCardToGraveyard(client.sessionId,message.card);
-    // })
-
+    this.onMessage("flipCard", (client, message) => {
+      this.state.flipCard(client.sessionId, message.card);
+    })
 
   }
 

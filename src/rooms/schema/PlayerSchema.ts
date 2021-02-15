@@ -4,15 +4,19 @@ import { Card, CardLocation } from "./CardSchema";
 import { Battlefield } from "./BattlefieldSchema";
 
 import { CardStorage } from '../../cards/cardStorage'
+import { Deck } from "./DeckSchema";
 
 export class Player extends Schema {
 
-    cardStorage:CardStorage;
+    cardStorage: CardStorage;
 
     @type("string")
     name: string;
     @type("string")
     sessionId: string;
+
+    @type(Deck)
+    deck: Deck = new Deck();
 
     @type(Hand)
     hand: Hand = new Hand();
@@ -20,28 +24,35 @@ export class Player extends Schema {
     @type(Battlefield)
     battlefield: Battlefield = new Battlefield();
 
-    constructor(sessionId: string, name: string,cardStorage:CardStorage) {
+    constructor(sessionId: string, name: string, cardStorage: CardStorage) {
         super();
         this.name = name;
         this.sessionId = sessionId;
         this.cardStorage = cardStorage;
+
+        this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
+        this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
+        this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
+        this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
+        this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
     }
 
-    cardDraw(message: any) {
-        this.hand.addCard(this.cardStorage.CreateCard(this.sessionId, null));
-    }
 
     findCard(card: Card): Card {
         return this.findCardById(card.id);
     }
 
-    findCardById(id:string):Card{
+    findCardById(id: string): Card {
         let foundCard = this.hand.findCardById(id);
-        if(foundCard){
+        if (foundCard) {
+            return foundCard;
+        }
+        foundCard = this.deck.findCardById(id);
+        if (foundCard) {
             return foundCard;
         }
         return this.battlefield.findCardById(id);
     }
 
-   
+
 }

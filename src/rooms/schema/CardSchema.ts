@@ -8,7 +8,8 @@ export enum CardLocation {
     Graveyard = "Graveyard",
     Exile = "Exile",
     AttachedToCard = "AttachedToCard",
-    Stack = "Stack"
+    Stack = "Stack",
+    Deck = "Deck"
 }
 export class ImageUris extends Schema {
     @type("string")
@@ -20,6 +21,13 @@ export class ImageUris extends Schema {
     @type("string")
     png: string;
 }
+export class CardFace extends Schema {
+    @type("string")
+    name: string;
+    @type(ImageUris)
+    image_uris: ImageUris;
+}
+
 
 export class Card extends Schema {
     @type("string")
@@ -38,6 +46,11 @@ export class Card extends Schema {
     name: string;
     @type(ImageUris)
     image_uris: ImageUris;
+    @type([CardFace])
+    cardFaces = new ArraySchema<CardFace>();
+    @type('boolean')
+    flipped: boolean = false;
+
 
     @type([Card])
     attachedCards = new ArraySchema<Card>();
@@ -45,7 +58,7 @@ export class Card extends Schema {
     attachedToCardId: string;
 
     @type(Counter)
-    counter:Counter;
+    counter: Counter;
 
     constructor(owner: string) {
         super();
@@ -72,6 +85,12 @@ export class Card extends Schema {
         this.name = card.name;
         this.image_uris = this.mapImageUris(card.image_uris);
         this.type_line = card.type_line;
+
+        if (card.card_faces) {
+            card.card_faces.forEach((element: any) => {
+                this.cardFaces.push(this.mapCardFace(element));
+            });
+        }
     }
 
     mapImageUris(image_uris: any): ImageUris {
@@ -81,6 +100,13 @@ export class Card extends Schema {
         finalObject.normal = image_uris.normal;
         finalObject.large = image_uris.large;
         finalObject.png = image_uris.png;
+        return finalObject;
+    }
+
+    mapCardFace(cardFace: any): CardFace {
+        let finalObject = new CardFace();
+        finalObject.name = cardFace.name;
+        finalObject.image_uris = this.mapImageUris(cardFace.image_uris);
         return finalObject;
     }
 
@@ -104,16 +130,24 @@ export class Card extends Schema {
     }
 
 
-    modifyOrCreateCounter(counterType:CounterTypes,amountToModify:number){
-        if(this.counter && this.counter.type == counterType){
+    modifyOrCreateCounter(counterType: CounterTypes, amountToModify: number) {
+        if (this.counter && this.counter.type == counterType) {
             this.counter.modifyAmount(amountToModify);
-        }else{
-            this.counter = new Counter(counterType,amountToModify);
+        } else {
+            this.counter = new Counter(counterType, amountToModify);
         }
     }
 
-    wipeCounters(){
+    wipeCounters() {
         this.counter = null;
+    }
+
+    flip() {
+        this.flipped = !this.flipped;
+    }
+
+    resetFlip() {
+        this.flipped = false;
     }
 
     // findCardById(id:string):Card{

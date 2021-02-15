@@ -1,38 +1,44 @@
-const Scry = require("scryfall-sdk");
+
+var mongoose = require('mongoose');
+const cardSchema = require('../models/Card');
+var CardModel = mongoose.model('cards');
 
 
-// Scry.Cards.search("").on("data", card => {
-// 	console.log(card.name);
-// }).on("end", () => {
-// 	console.log("done");
-// });
+const rawCardJSON = require('../../default-cards-20210208220255.json');
 
-
-let finalJson = [];
-var fs = require('fs');
-
-const go = async () => {
-    let total = 0;
-    let allSets = await Scry.Sets.all();
-    console.log(allSets.length)
-
-    for (let x = 0; x < 10; x++) {
-        for(let cardNumber = 1;cardNumber <= allSets[x].card_count;cardNumber++){
-            
-            let card = await Scry.Cards.bySet(allSets[x].code, cardNumber)
-            console.log("card downloaded...")
-            finalJson.push(card);
+const findCardByName = (name) =>{
+    for(let x = 0;x < rawCardJSON.length;x++){
+        if(rawCardJSON[x].name.toUpperCase() == name.toUpperCase()){
+            return rawCardJSON[x];
         }
     }
-
-    fs.writeFile('allCards.json', finalJson, 'utf8', ()=>{
-
-    });
-    console.log("done...")
-    console.log(finalJson.length)
+    return null;
 }
 
-//go();
+const downloadAll = async()=>{
+    let database = require('../database/main-database');
+    await database.connect();
 
-let test = require('../../default-cards-20210208220255.json')
-console.log(test.length)
+    //let target = findCardByName("Huntmaster of the Fells // Ravager of the Fells");
+    for(let x = 0; x < rawCardJSON.length; x++){
+        console.log(x);
+        await uploadCard(rawCardJSON[x]);
+    }
+    console.log("DONE!")
+}
+
+const uploadCard = async(card)=>{
+    let newCard = new CardModel();
+    newCard.name = card.name;
+    newCard.id = card.id;
+    newCard.card_faces = card.card_faces;
+    newCard.mana_cost = card.mana_cost;
+    newCard.type_line = card.type_line;
+    newCard.image_uris = card.image_uris;
+
+    let result = await newCard.save().catch(error=>{
+        console.log("error saving card: ",error)
+    })
+}
+
+downloadAll();
