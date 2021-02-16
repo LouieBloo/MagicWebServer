@@ -5,6 +5,7 @@ import { BattlefieldRowType } from "./BattlefieldRowSchema";
 import { CardStorage } from "../../cards/cardStorage";
 import { Counter, CounterTypes } from "./CounterSchema";
 import { Stack } from "./StackSchema";
+import { DeckFromLocation } from "./DeckSchema";
 
 export class GameState extends Schema {
 
@@ -36,7 +37,7 @@ export class GameState extends Schema {
     }
   }
 
-  cardChangeLocation(sessionId: string, inputCard: Card, newLocation: CardLocation, battlefieldRowType: BattlefieldRowType = null, owner: string) {
+  cardChangeLocation(sessionId: string, inputCard: Card, newLocation: CardLocation, battlefieldRowType: BattlefieldRowType = null, owner: string,deckFromLocation:DeckFromLocation = null) {
 
     let card = this.cardStorage.GetRealSchemaCard(inputCard.id);
 
@@ -71,7 +72,7 @@ export class GameState extends Schema {
     } else if (newLocation == CardLocation.Stack) {
       this.stack.addCard(card);
     } else if (newLocation == CardLocation.Deck) {
-      this.players.get(sessionId).deck.addCard(card,false);
+      this.players.get(sessionId).deck.addCard(card,deckFromLocation);
     }
 
     //unattach all things from this card if it is leaving the battelfield

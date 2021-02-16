@@ -2,12 +2,15 @@ import { Schema, MapSchema, type, ArraySchema } from "@colyseus/schema";
 import { Card, CardLocation } from "./CardSchema";
 import { CardStorage } from "../../cards/cardStorage";
 
-
+export interface DeckFromLocation {
+    amount: number;
+    fromTop: boolean;
+}
 
 export class Deck extends Schema {
 
     @type([Card])
-    cards = new ArraySchema<Card>();
+    cards: Card[] = [];
 
     cardStorage: CardStorage;
 
@@ -20,23 +23,42 @@ export class Deck extends Schema {
     //will do it for us
     drawCardsNoModify(amount: number): Card[] {
         let returnCards: Card[] = [];
-        for (let x = 0; x < amount; x++) {
-            if (this.cards.length > 0) {
-                returnCards.push(this.cards[this.cards.length - 1]);
-            }
-
+        for (let x = 0; x < amount && x < this.cards.length; x++) {
+            returnCards.push(this.cards[x]);
         }
         return returnCards;
     }
 
-    addCard(card: Card, top: boolean = true) {
+    addCard(card: Card, deckFromLocation: DeckFromLocation) {
         card.location = CardLocation.Deck;
         card.rotation = 0;
-        if (top) {
+        if ((!deckFromLocation.fromTop && deckFromLocation.amount == 1) || this.cards.length < 1) {
             this.cards.push(card);
         } else {
-            this.cards.unshift(card);
+            this.insertCardAtPosition(card,deckFromLocation);
         }
+    }
+
+    insertCardAtPosition(card: Card, deckFromLocation: DeckFromLocation) {
+        console.log("Deck Count: ", this.cards.length)
+        let newDeck: Card[] = [];
+        if(deckFromLocation.fromTop){
+            for(let x = 0; x<this.cards.length;x++){
+                if(x == (deckFromLocation.amount-1)){
+                    newDeck.push(card);
+                }
+                newDeck.push(this.cards[x]);
+            }
+        }else{
+            for(let x = 0; x<this.cards.length;x++){
+                newDeck.push(this.cards[x]);
+                if(x == (this.cards.length - deckFromLocation.amount)){
+                    newDeck.push(card);
+                }
+            }
+        }
+        this.cards = newDeck;
+        console.log("Deck Count After: ", this.cards.length)
     }
 
     removeCard(card: Card) {
@@ -67,7 +89,7 @@ export class Deck extends Schema {
                 // card.location = CardLocation.Deck;
                 // card.rotation = 0;
                 //allCards.push(card);
-                this.addCard(card,true);
+                this.addCard(card, { amount: 1, fromTop: false });
             }
         }
 

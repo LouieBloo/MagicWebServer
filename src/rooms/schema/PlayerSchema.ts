@@ -32,11 +32,20 @@ export class Player extends Schema {
         this.cardStorage = cardStorage;
         this.deck = new Deck(cardStorage)
 
-        // this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
-        // this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
-        // this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
-        // this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
-        // this.deck.addCard(this.cardStorage.CreateCard(sessionId,null))
+        this.addNothing();
+    }
+
+    addNothing = async () => {
+        let card = await this.cardStorage.CreateCard(this.sessionId,null);
+        this.deck.addCard(card, {amount:1,fromTop:false})
+        card = await this.cardStorage.CreateCard(this.sessionId,null);
+        this.deck.addCard(card, {amount:1,fromTop:false})
+        card = await this.cardStorage.CreateCard(this.sessionId,null);
+        this.deck.addCard(card, {amount:1,fromTop:false})
+        card = await this.cardStorage.CreateCard(this.sessionId,null);
+        this.deck.addCard(card, {amount:1,fromTop:false})
+        card = await this.cardStorage.CreateCard(this.sessionId,null);
+        this.deck.addCard(card, {amount:1,fromTop:false})
     }
 
 
@@ -56,11 +65,11 @@ export class Player extends Schema {
         return this.battlefield.findCardById(id);
     }
 
-    importDeck(deck:any){
+    importDeck(deck: any) {
         this.deck = new Deck(this.cardStorage);
         this.hand = new Hand();
         this.battlefield = new Battlefield();
 
-        this.deck.import(this.sessionId,deck);
+        this.deck.import(this.sessionId, deck);
     }
 }
