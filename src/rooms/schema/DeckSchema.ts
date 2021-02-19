@@ -40,7 +40,6 @@ export class Deck extends Schema {
     }
 
     insertCardAtPosition(card: Card, deckFromLocation: DeckFromLocation) {
-        console.log("Deck Count: ", this.cards.length)
         let newDeck: Card[] = [];
         if(deckFromLocation.fromTop){
             for(let x = 0; x<this.cards.length;x++){
@@ -58,7 +57,6 @@ export class Deck extends Schema {
             }
         }
         this.cards = newDeck;
-        console.log("Deck Count After: ", this.cards.length)
     }
 
     removeCard(card: Card) {
@@ -92,8 +90,28 @@ export class Deck extends Schema {
                 this.addCard(card, { amount: 1, fromTop: false });
             }
         }
-
-        //console.log(allCards)
-        //this.cards = allCards;
     }
+
+    shuffle(){
+        this.shuffleReal(this.cards)
+    }
+
+    shuffleReal(array:Card[]) {
+        var currentIndex = array.length, temporaryValue, randomIndex;
+      
+        // While there remain elements to shuffle...
+        while (0 !== currentIndex) {
+      
+          // Pick a remaining element...
+          randomIndex = Math.floor(Math.random() * currentIndex);
+          currentIndex -= 1;
+      
+          // And swap it with the current element.
+          temporaryValue = array[currentIndex];
+          array[currentIndex] = array[randomIndex];
+          array[randomIndex] = temporaryValue;
+        }
+      
+        return array;
+      }
 }

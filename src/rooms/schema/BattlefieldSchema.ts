@@ -3,6 +3,7 @@ import { BattlefieldRow, BattlefieldRowType } from './BattlefieldRowSchema';
 import { Graveyard } from "./GraveyardSchema";
 import { Exile } from "./ExileSchema";
 import { Card, CardLocation } from "./CardSchema";
+import { CommandZone } from "./CommandZoneSchema";
 
 
 export class Battlefield extends Schema {
@@ -14,6 +15,8 @@ export class Battlefield extends Schema {
     graveyard: Graveyard = new Graveyard();
     @type(Exile)
     exile: Exile = new Exile();
+    @type(CommandZone)
+    commandZone: CommandZone = new CommandZone();
 
     constructor() {
         super();
@@ -64,6 +67,9 @@ export class Battlefield extends Schema {
         }
         if(!foundCard){
             foundCard = this.exile.findCardById(id);
+        }
+        if(!foundCard){
+            foundCard = this.commandZone.findCardById(id);
         }
         return foundCard;
     }

@@ -51,6 +51,9 @@ export class GameState extends Schema {
       this.players.get(sessionId).battlefield.graveyard.removeCard(card);
     } else if (card.location == CardLocation.Exile) {
       this.players.get(sessionId).battlefield.exile.removeCard(card);
+    } else if (card.location == CardLocation.CommandZone) {
+      console.log("here!")
+      this.players.get(sessionId).battlefield.commandZone.removeCard(card);
     } else if (card.location == CardLocation.AttachedToCard) {
       let attachedToCard: Card = this.cardStorage.GetRealSchemaCard(card.attachedToCardId);
       if (!attachedToCard) { console.error("cant find card by id!"); return; }
@@ -69,6 +72,8 @@ export class GameState extends Schema {
       this.players.get(sessionId).battlefield.graveyard.addCard(card);
     } else if (newLocation == CardLocation.Exile) {
       this.players.get(sessionId).battlefield.exile.addCard(card);
+    }else if (newLocation == CardLocation.CommandZone) {
+      this.players.get(sessionId).battlefield.commandZone.addCard(card);
     } else if (newLocation == CardLocation.Stack) {
       this.stack.addCard(card);
     } else if (newLocation == CardLocation.Deck) {
@@ -119,5 +124,9 @@ export class GameState extends Schema {
 
   importDeck(sessionId: string, deck: any){
     this.players.get(sessionId).importDeck(deck);
+  }
+
+  shuffleDeck(sessionId:string){
+    this.players.get(sessionId).shuffleDeck();
   }
 }

@@ -70,6 +70,20 @@ export class Player extends Schema {
         this.hand = new Hand();
         this.battlefield = new Battlefield();
 
-        this.deck.import(this.sessionId, deck);
+        this.deck.import(this.sessionId, deck.deck);
+        this.importCommander(deck.commander)
+    }
+
+    importCommander = async(commanderObject:any)=>{
+        for (let x = 0; x < commanderObject.length; x++) {
+            for (let y = 0; y < commanderObject[x].amount; y++) {
+                let card = await this.cardStorage.CreateCard(this.sessionId, commanderObject[x].card.id);
+                this.battlefield.commandZone.addCard(card);
+            }
+        }
+    }
+
+    shuffleDeck(){
+        this.deck.shuffle();
     }
 }

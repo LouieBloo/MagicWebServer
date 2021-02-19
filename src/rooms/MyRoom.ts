@@ -50,6 +50,10 @@ export class MyRoom extends Room {
       this.state.importDeck(client.sessionId, message.deck);
     })
 
+    this.onMessage("shuffleDeck", (client, message) => {
+      this.state.shuffleDeck(client.sessionId);
+    })
+
   }
 
   onJoin(client: Client, options: any) {

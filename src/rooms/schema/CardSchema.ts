@@ -9,7 +9,8 @@ export enum CardLocation {
     Exile = "Exile",
     AttachedToCard = "AttachedToCard",
     Stack = "Stack",
-    Deck = "Deck"
+    Deck = "Deck",
+    CommandZone = "CommandZone"
 }
 export class ImageUris extends Schema {
     @type("string")
