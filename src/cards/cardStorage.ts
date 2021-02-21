@@ -37,6 +37,10 @@ export class CardStorage {
         }
     }
 
+    addCard = (card:Card)=>{
+        this.loadedCards.push(card);
+    }
+
     wipe = ()=>{
         this.loadedCards = [];
     }

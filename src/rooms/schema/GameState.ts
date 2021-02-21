@@ -9,7 +9,7 @@ import { DeckFromLocation } from "./DeckSchema";
 
 export class GameState extends Schema {
 
-  cardStorage: CardStorage = new CardStorage();
+  // cardStorage: CardStorage = new CardStorage();
 
   @type("string")
   mySynchronizedProperty: string = "Hello world";
@@ -27,7 +27,7 @@ export class GameState extends Schema {
       allSessionIds.push(player.sessionId);
     })
 
-    this.players.set(sessionId, new Player(sessionId, name, this.cardStorage));
+    this.players.set(sessionId, new Player(sessionId, name));
     allSessionIds.forEach(oldPlayerId=>{
       this.players.get(sessionId).addNewCommanderDamageCounter(oldPlayerId);
     })
@@ -48,11 +48,28 @@ export class GameState extends Schema {
 
   cardChangeLocation = async(sessionId: string, inputCard: Card, newLocation: CardLocation, battlefieldRowType: BattlefieldRowType = null, owner: string,deckFromLocation:DeckFromLocation = null) =>{
 
+    
+
     let card = null;
     if(inputCard.location == CardLocation.Inserting){
       card = await this.players.get(sessionId).cardStorage.CreateCard(sessionId,inputCard.disc_id);
     }else{
-      card = this.cardStorage.GetRealSchemaCard(inputCard.id);
+      card = this.players.get(sessionId).cardStorage.GetRealSchemaCard(inputCard.id);
+    }
+
+    let playerWithCardAfterMove = owner || sessionId;
+    let playerWithCardBeforeMove = sessionId;
+    if(playerWithCardAfterMove != playerWithCardBeforeMove || inputCard.owner != sessionId){
+      //moving someone elses card to me
+      playerWithCardBeforeMove = inputCard.owner;
+      //find it in the player who owns it nows storage
+      card = this.players.get(playerWithCardBeforeMove).cardStorage.GetRealSchemaCard(inputCard.id);
+      //remove from their storage
+      this.players.get(playerWithCardBeforeMove).cardStorage.deleteCard(card)
+      //add to our storage
+      this.players.get(playerWithCardAfterMove).cardStorage.addCard(card);
+      //change card owner
+      card.owner = playerWithCardAfterMove;
     }
 
     //when a card is moved if it has attachments we need to track what row type this card was in
@@ -66,10 +83,9 @@ export class GameState extends Schema {
     } else if (card.location == CardLocation.Exile) {
       this.players.get(sessionId).battlefield.exile.removeCard(card);
     } else if (card.location == CardLocation.CommandZone) {
-      console.log("here!")
       this.players.get(sessionId).battlefield.commandZone.removeCard(card);
     } else if (card.location == CardLocation.AttachedToCard) {
-      let attachedToCard: Card = this.cardStorage.GetRealSchemaCard(card.attachedToCardId);
+      let attachedToCard: Card =  this.players.get(sessionId).cardStorage.GetRealSchemaCard(card.attachedToCardId);
       if (!attachedToCard) { console.error("cant find card by id!"); return; }
       attachedToCard.removeAttachedCard(card);
     } else if (card.location == CardLocation.Stack) {
@@ -81,7 +97,7 @@ export class GameState extends Schema {
     if (newLocation == CardLocation.Hand) {
       this.players.get(sessionId).hand.addCard(card);
     } else if (newLocation == CardLocation.Battlefield) {
-      this.players.get(owner).battlefield.addCard(card, battlefieldRowType);
+      this.players.get(playerWithCardAfterMove).battlefield.addCard(card, battlefieldRowType);
     } else if (newLocation == CardLocation.Graveyard) {
       this.players.get(sessionId).battlefield.graveyard.addCard(card);
     } else if (newLocation == CardLocation.Exile) {
@@ -95,8 +111,8 @@ export class GameState extends Schema {
     }
 
     //unattach all things from this card if it is leaving the battelfield
-    if (card.attachedCards.length > 0 && newLocation != CardLocation.Battlefield) {
-      this.unAttachAllCardsFromCard(sessionId, card, removedCardType);
+    if (card.attachedCards.length > 0 && newLocation != CardLocation.Battlefield || playerWithCardAfterMove != playerWithCardBeforeMove) {
+      this.unAttachAllCardsFromCard(playerWithCardBeforeMove, card, removedCardType);
     }
 
     if (newLocation != CardLocation.Battlefield && newLocation != CardLocation.AttachedToCard && newLocation != CardLocation.Stack) {
@@ -105,18 +121,18 @@ export class GameState extends Schema {
     }
 
     if(newLocation == CardLocation.Trash){
-      this.players.get(sessionId).cardStorage.deleteCard(inputCard);
+      this.players.get(playerWithCardBeforeMove).cardStorage.deleteCard(inputCard);
     }
   }
 
   cardRotated(sessionId: string, card: Card) {
-    this.players.get(sessionId).battlefield.rotateCard(this.cardStorage.GetRealSchemaCard(card.id));
+    this.players.get(sessionId).battlefield.rotateCard( this.players.get(sessionId).cardStorage.GetRealSchemaCard(card.id));
   }
 
   cardAttached(sessionId: string, targetCard: Card, sourceCard: Card) {
 
-    let foundRealTargetCard = this.cardStorage.GetRealSchemaCard(targetCard.id);
-    let foundRealSourceCard = this.cardStorage.GetRealSchemaCard(sourceCard.id);
+    let foundRealTargetCard =  this.players.get(sessionId).cardStorage.GetRealSchemaCard(targetCard.id);
+    let foundRealSourceCard =  this.players.get(sessionId).cardStorage.GetRealSchemaCard(sourceCard.id);
     if (!foundRealTargetCard || !foundRealSourceCard) { return; }
 
     if (foundRealTargetCard.location != CardLocation.Battlefield) { console.error("ERROR: cant attach card that is not on battlefield"); return; }
@@ -136,12 +152,12 @@ export class GameState extends Schema {
   }
 
   createOrModifyCounterOnCard(sessionId: string, targetCard: Card, counterType: CounterTypes, amount: number) {
-    let card = this.cardStorage.GetRealSchemaCard(targetCard.id);
+    let card =  this.players.get(sessionId).cardStorage.GetRealSchemaCard(targetCard.id);
     card.modifyOrCreateCounter(counterType, amount)
   }
 
   flipCard(sessionId: string, card: Card) {
-    this.cardStorage.GetRealSchemaCard(card.id).flip();
+    this.players.get(sessionId).cardStorage.GetRealSchemaCard(card.id).flip();
   }
 
   importDeck(sessionId: string, deck: any){

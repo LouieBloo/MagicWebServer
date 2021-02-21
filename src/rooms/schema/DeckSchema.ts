@@ -82,15 +82,23 @@ export class Deck extends Schema {
 
     import = async (sessionId: string, deck: any,mulligan:boolean,gameState:GameState) => {
         //let allCards: ArraySchema<Card> = new ArraySchema<Card>();
+        let createCardPromises = [];
         for (let x = 0; x < deck.length; x++) {
             for (let y = 0; y < deck[x].amount; y++) {
-                let card = await this.cardStorage.CreateCard(sessionId, deck[x].card.id);
+                createCardPromises.push(this.cardStorage.CreateCard(sessionId, deck[x].card.id))
+                //let card = await this.cardStorage.CreateCard(sessionId, deck[x].card.id);
                 // card.location = CardLocation.Deck;
                 // card.rotation = 0;
                 //allCards.push(card);
-                this.addCard(card, { amount: 1, fromTop: false });
+                
             }
         }
+
+        let newCards = await Promise.all(createCardPromises);
+        newCards.forEach(newCard=>{
+            this.addCard(newCard, { amount: 1, fromTop: false });
+        })
+
         this.shuffle();
         if(mulligan){
             gameState.cardDraw(sessionId,{amount:7})

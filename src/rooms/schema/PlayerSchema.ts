@@ -11,7 +11,7 @@ import { GameState } from "./GameState";
 
 export class Player extends Schema {
 
-    cardStorage: CardStorage;
+    cardStorage: CardStorage = new CardStorage();
 
     @type("string")
     name: string;
@@ -36,12 +36,11 @@ export class Player extends Schema {
 
     savedImportDeck:any;
 
-    constructor(sessionId: string, name: string, cardStorage: CardStorage) {
+    constructor(sessionId: string, name: string) {
         super();
         this.name = name;
         this.sessionId = sessionId;
-        this.cardStorage = cardStorage;
-        this.deck = new Deck(cardStorage)
+        this.deck = new Deck(this.cardStorage)
 
         this.addNothing();
     }
