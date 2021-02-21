@@ -25,6 +25,22 @@ export class CardStorage {
         }
     }
 
+    deleteCard = (card:Card)=>{
+        let index = null;
+        for (let x = 0; x < this.loadedCards.length; x++) {
+            if (this.loadedCards[x].id == card.id) {
+                index = x;
+            }
+        }
+        if(index){
+            this.loadedCards.splice(index, 1);
+        }
+    }
+
+    wipe = ()=>{
+        this.loadedCards = [];
+    }
+
     private createCardFromId = async(sessionId: string, id: string): Promise<Card> => {
         let newCard: Card = new Card(sessionId);
         let cardOnDisc = await this.findCardOnDisc(id);

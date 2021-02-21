@@ -3,7 +3,9 @@ var router = express.Router();
 
 const routeManager = require('./routeManager');
 const validateCards = require('../cards/validateDeckController');
+const searchCards = require('../cards/findCardController');
 
 router.post('/validate',routeManager(validateCards));
+router.get('/search',routeManager(searchCards));
 
 module.exports = router;

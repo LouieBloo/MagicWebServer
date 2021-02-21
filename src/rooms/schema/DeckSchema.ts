@@ -1,6 +1,7 @@
 import { Schema, MapSchema, type, ArraySchema } from "@colyseus/schema";
 import { Card, CardLocation } from "./CardSchema";
 import { CardStorage } from "../../cards/cardStorage";
+import { GameState } from "./GameState";
 
 export interface DeckFromLocation {
     amount: number;
@@ -79,7 +80,7 @@ export class Deck extends Schema {
         return null;
     }
 
-    import = async (sessionId: string, deck: any) => {
+    import = async (sessionId: string, deck: any,mulligan:boolean,gameState:GameState) => {
         //let allCards: ArraySchema<Card> = new ArraySchema<Card>();
         for (let x = 0; x < deck.length; x++) {
             for (let y = 0; y < deck[x].amount; y++) {
@@ -89,6 +90,10 @@ export class Deck extends Schema {
                 //allCards.push(card);
                 this.addCard(card, { amount: 1, fromTop: false });
             }
+        }
+        this.shuffle();
+        if(mulligan){
+            gameState.cardDraw(sessionId,{amount:7})
         }
     }
 

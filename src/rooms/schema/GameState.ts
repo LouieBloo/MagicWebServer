@@ -21,7 +21,16 @@ export class GameState extends Schema {
   stack: Stack = new Stack();
 
   createPlayer(sessionId: string, name: string) {
+    let allSessionIds:string[] = [];
+    this.players.forEach(player=>{
+      player.addNewCommanderDamageCounter(sessionId);
+      allSessionIds.push(player.sessionId);
+    })
+
     this.players.set(sessionId, new Player(sessionId, name, this.cardStorage));
+    allSessionIds.forEach(oldPlayerId=>{
+      this.players.get(sessionId).addNewCommanderDamageCounter(oldPlayerId);
+    })
   }
 
   cardPlayed(message: any) {
@@ -37,9 +46,14 @@ export class GameState extends Schema {
     }
   }
 
-  cardChangeLocation(sessionId: string, inputCard: Card, newLocation: CardLocation, battlefieldRowType: BattlefieldRowType = null, owner: string,deckFromLocation:DeckFromLocation = null) {
+  cardChangeLocation = async(sessionId: string, inputCard: Card, newLocation: CardLocation, battlefieldRowType: BattlefieldRowType = null, owner: string,deckFromLocation:DeckFromLocation = null) =>{
 
-    let card = this.cardStorage.GetRealSchemaCard(inputCard.id);
+    let card = null;
+    if(inputCard.location == CardLocation.Inserting){
+      card = await this.players.get(sessionId).cardStorage.CreateCard(sessionId,inputCard.disc_id);
+    }else{
+      card = this.cardStorage.GetRealSchemaCard(inputCard.id);
+    }
 
     //when a card is moved if it has attachments we need to track what row type this card was in
     let removedCardType = null;
@@ -89,6 +103,10 @@ export class GameState extends Schema {
       card.wipeCounters();
       card.resetFlip();
     }
+
+    if(newLocation == CardLocation.Trash){
+      this.players.get(sessionId).cardStorage.deleteCard(inputCard);
+    }
   }
 
   cardRotated(sessionId: string, card: Card) {
@@ -113,6 +131,10 @@ export class GameState extends Schema {
     })
   }
 
+  cardCopied(sessionId:string,card:Card){
+    this.players.get(sessionId).cardCopied(card);
+  }
+
   createOrModifyCounterOnCard(sessionId: string, targetCard: Card, counterType: CounterTypes, amount: number) {
     let card = this.cardStorage.GetRealSchemaCard(targetCard.id);
     card.modifyOrCreateCounter(counterType, amount)
@@ -128,5 +150,17 @@ export class GameState extends Schema {
 
   shuffleDeck(sessionId:string){
     this.players.get(sessionId).shuffleDeck();
+  }
+
+  untapAll(sessionId:string){
+    this.players.get(sessionId).untapAll();
+  }
+
+  modifyPlayerCounter(sessionId: string, counterType: CounterTypes, amount: number,playerId:string = null) {
+    this.players.get(sessionId).modifyCounter(counterType, amount,playerId)
+  }
+
+  mulligan(sessionId:string){
+    this.players.get(sessionId).mulligan(this);
   }
 }

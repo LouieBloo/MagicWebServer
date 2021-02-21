@@ -73,4 +73,21 @@ export class Battlefield extends Schema {
         }
         return foundCard;
     }
+
+    cardCopied(card:Card,newCard:Card){
+        this.battlefieldRows.forEach(row=>{
+            let rowCard = row.findCardById(card.id);
+            if(rowCard){
+                row.addCard(newCard);
+            }
+        })
+    }
+
+    untapAll(){
+        this.battlefieldRows.forEach(row=>{
+            row.cards.forEach(card=>{
+                card.rotation = 0;
+            })
+        })
+    }
 }

@@ -10,7 +10,9 @@ export enum CardLocation {
     AttachedToCard = "AttachedToCard",
     Stack = "Stack",
     Deck = "Deck",
-    CommandZone = "CommandZone"
+    CommandZone = "CommandZone",
+    Inserting="Inserting",
+    Trash="Trash"
 }
 export class ImageUris extends Schema {
     @type("string")
@@ -48,7 +50,7 @@ export class Card extends Schema {
     @type(ImageUris)
     image_uris: ImageUris;
     @type([CardFace])
-    cardFaces = new ArraySchema<CardFace>();
+    card_faces = new ArraySchema<CardFace>();
     @type('boolean')
     flipped: boolean = false;
 
@@ -89,7 +91,7 @@ export class Card extends Schema {
 
         if (card.card_faces) {
             card.card_faces.forEach((element: any) => {
-                this.cardFaces.push(this.mapCardFace(element));
+                this.card_faces.push(this.mapCardFace(element));
             });
         }
     }

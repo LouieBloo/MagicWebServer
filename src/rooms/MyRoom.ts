@@ -38,8 +38,16 @@ export class MyRoom extends Room {
       this.state.cardAttached(client.sessionId, message.targetCard,message.sourceCard);
     })
 
+    this.onMessage("cardCopied", (client, message) => {
+      this.state.cardCopied(client.sessionId, message.card);
+    })
+
     this.onMessage("createOrModifyCounterOnCard", (client, message) => {
       this.state.createOrModifyCounterOnCard(client.sessionId, message.targetCard,message.counterType,message.amount);
+    })
+
+    this.onMessage("modifyPlayerCounter", (client, message) => {
+      this.state.modifyPlayerCounter(client.sessionId, message.counterType,message.amount,message.playerId);
     })
 
     this.onMessage("flipCard", (client, message) => {
@@ -52,6 +60,14 @@ export class MyRoom extends Room {
 
     this.onMessage("shuffleDeck", (client, message) => {
       this.state.shuffleDeck(client.sessionId);
+    })
+
+    this.onMessage("untapAll", (client, message) => {
+      this.state.untapAll(client.sessionId);
+    })
+
+    this.onMessage("mulligan", (client, message) => {
+      this.state.mulligan(client.sessionId);
     })
 
   }
