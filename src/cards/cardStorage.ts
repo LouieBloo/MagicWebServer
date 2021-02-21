@@ -1,6 +1,6 @@
 import { Card } from "../rooms/schema/CardSchema";
 
-const allCards = require('../../default-cards-20210208220255.json')
+// const allCards = require('../../default-cards-20210208220255.json')
 
 const mongoose = require('mongoose');
 const CardModel = mongoose.model('cards');
@@ -55,25 +55,22 @@ export class CardStorage {
 
     private CreateRandomCard = async(sessionId: string): Promise<Card> => {
         let newCard: Card = new Card(sessionId);
-        newCard.setFromDisc(allCards[Math.round(Math.random() * allCards.length)]);
+        let cardOnDisc = await this.findRandomCardOnDisc();
+        newCard.setFromDisc(cardOnDisc);
         this.loadedCards.push(newCard);
         return newCard;
     }
-
-    private findCardByName(name: string): Card {
-        for (let x = 0; x < allCards.length; x++) {
-            if (allCards[x].name.toUpperCase() == name.toUpperCase()) {
-                return allCards[x];
-            }
-        }
-        return null;
-    }
-
 
     private findCardOnDisc = async (id: string) => {
         let foundCard = await CardModel.findOne({ id: id });
         // console.log("found card: ",foundCard);
         return foundCard;
+    }
+
+    private findRandomCardOnDisc = async () => {
+        let foundCard = await CardModel.aggregate([{ $sample: { size: 1 } }])
+        // console.log("found card: ",foundCard);
+        return foundCard[0];
     }
 
 }
