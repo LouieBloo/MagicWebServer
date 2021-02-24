@@ -59,7 +59,7 @@ export class GameState extends Schema {
 
     let playerWithCardAfterMove = owner || sessionId;
     let playerWithCardBeforeMove = sessionId;
-    if(playerWithCardAfterMove != playerWithCardBeforeMove || inputCard.owner != sessionId){
+    if(inputCard.location != CardLocation.Inserting && (playerWithCardAfterMove != playerWithCardBeforeMove || inputCard.owner != sessionId)){
       //moving someone elses card to me
       playerWithCardBeforeMove = inputCard.owner;
       //find it in the player who owns it nows storage
