@@ -6,6 +6,7 @@ import { CardStorage } from "../../cards/cardStorage";
 import { Counter, CounterTypes } from "./CounterSchema";
 import { Stack } from "./StackSchema";
 import { DeckFromLocation } from "./DeckSchema";
+import { Room } from "colyseus.js";
 
 export class GameState extends Schema {
 
@@ -47,8 +48,6 @@ export class GameState extends Schema {
   }
 
   cardChangeLocation = async(sessionId: string, inputCard: Card, newLocation: CardLocation, battlefieldRowType: BattlefieldRowType = null, owner: string,deckFromLocation:DeckFromLocation = null) =>{
-
-    
 
     let card = null;
     if(inputCard.location == CardLocation.Inserting){
@@ -178,5 +177,31 @@ export class GameState extends Schema {
 
   mulligan(sessionId:string){
     this.players.get(sessionId).mulligan(this);
+  }
+
+
+
+  handleChatMessage =(client:any,message:any,room:any)=>{
+    if(!message || !message.message){return;}
+
+    let chatMessage:string = message.message.trim();
+    let playerThatSentMessage:Player = this.players.get(client.sessionId);
+
+    let broadcastMessage = "";
+    if(chatMessage.includes("/roll ")){
+      let diceSize:string = chatMessage.split("/roll ")[1];
+      let randomNumber = this.getRandomInt(1,parseInt(diceSize));
+      broadcastMessage += "rolled a (D" + diceSize + "): " + randomNumber;
+    }else{
+      broadcastMessage += chatMessage;
+    }
+
+    room.broadcast("chat", {playerName: playerThatSentMessage.name,playerId: playerThatSentMessage.sessionId,message:broadcastMessage});
+  }
+
+  getRandomInt(min:number, max:number) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 }
