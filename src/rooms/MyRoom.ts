@@ -21,6 +21,7 @@ export class MyRoom extends Room {
     this.onMessage("cardDraw", (client, message) => {
       // console.log("draw")
       this.state.cardDraw(client.sessionId, message)
+      
     })
 
     this.onMessage("cardChangeLocation", (client, message) => {
@@ -70,7 +71,11 @@ export class MyRoom extends Room {
       this.state.mulligan(client.sessionId);
     })
 
+    this.onMessage("chat", (client, message) => {
+      this.state.handleChatMessage(client,message,this)
+    })
   }
+
 
   onJoin(client: Client, options: any) {
     // console.log("onJoin",client,options)
