@@ -4,8 +4,19 @@ import { Player } from './schema/PlayerSchema';
 
 export class MyRoom extends Room {
 
+  // roomId:string;
+
+  constructor(options:any){
+    super(options)
+    
+    //this.roomId = options.roomId;
+  }
+
   onCreate(options: any) {
-    this.setState(new GameState());
+    console.log("on create")
+    // this.roomId = options.roomId;
+
+    this.setState(new GameState(this));
 
     this.onMessage("type", (client, message) => {
       //
@@ -72,10 +83,19 @@ export class MyRoom extends Room {
     })
 
     this.onMessage("chat", (client, message) => {
-      this.state.handleChatMessage(client,message,this)
+      this.state.handleChatMessage(client,message)
     })
+
+    this.onMessage("endTurn", (client, message) => {
+      this.state.playerEndedTurn(client.sessionId)
+    })
+
   }
 
+  // onAuth(client:any, options:any, request:any) {
+  //   console.log("Requesting: ",options)
+  //   return this.roomId === options.roomId;
+  // }
 
   onJoin(client: Client, options: any) {
     // console.log("onJoin",client,options)
