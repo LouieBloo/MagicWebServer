@@ -4,8 +4,21 @@ import { Player } from './schema/PlayerSchema';
 
 export class MyRoom extends Room {
 
+  // roomId:string;
+
+  maxPlayerCount:number = 8;
+
+  constructor(options:any){
+    super(options)
+    
+    //this.roomId = options.roomId;
+  }
+
   onCreate(options: any) {
-    this.setState(new GameState());
+    console.log("on create")
+    // this.roomId = options.roomId;
+
+    this.setState(new GameState(this));
 
     this.onMessage("type", (client, message) => {
       //
@@ -63,6 +76,10 @@ export class MyRoom extends Room {
       this.state.shuffleDeck(client.sessionId);
     })
 
+    this.onMessage("startTurn", (client, message) => {
+      this.state.startTurn(client.sessionId);
+    })
+
     this.onMessage("untapAll", (client, message) => {
       this.state.untapAll(client.sessionId);
     })
@@ -72,10 +89,18 @@ export class MyRoom extends Room {
     })
 
     this.onMessage("chat", (client, message) => {
-      this.state.handleChatMessage(client,message,this)
+      this.state.handleChatMessage(client,message)
     })
+
+    this.onMessage("endTurn", (client, message) => {
+      this.state.playerEndedTurn(client.sessionId)
+    })
+
   }
 
+  onAuth(client:any, options:any, request:any) {
+    return this.state.canAddMorePlayers(this.maxPlayerCount);
+  }
 
   onJoin(client: Client, options: any) {
     // console.log("onJoin",client,options)

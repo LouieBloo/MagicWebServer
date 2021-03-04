@@ -34,6 +34,9 @@ export class Player extends Schema {
     @type({ map: Counter })
     commanderDamages = new MapSchema<Counter>();
 
+    @type("boolean")
+    isCurrentTurn:boolean = false;
+
     savedImportDeck:any;
 
     constructor(sessionId: string, name: string) {
