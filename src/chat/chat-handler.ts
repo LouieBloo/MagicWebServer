@@ -12,6 +12,9 @@ export const handleChatMessage = (client: any, message: any, room: any, players:
         let diceSize: string = chatMessage.split("/roll ")[1];
         let randomNumber = getRandomInt(1, parseInt(diceSize));
         broadcastMessage += "rolled a (D" + diceSize + "): " + randomNumber;
+    }else if(chatMessage.includes("/help")){
+        generateServerMessage(getHelpText(),room);
+        return;
     } else {
         broadcastMessage += chatMessage;
     }
@@ -35,4 +38,8 @@ const getRandomInt = (min: number, max: number) => {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+const getHelpText = ()=>{
+    return "\n** Available Commands **\n- /roll X where X is a number\n- /help"
 }

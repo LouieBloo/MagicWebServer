@@ -30,17 +30,24 @@ export class GameState extends Schema {
   @type(Stack)
   stack: Stack = new Stack();
 
+
+
   playerIdsInTurnOrder: string[] = [];
   indexOfPlayersTurn = 0;
 
+  canAddMorePlayers(maxPlayerSize:number):boolean{
+    return this.players.size < maxPlayerSize;
+  }
+
   createPlayer(sessionId: string, name: string) {
+    name = name.charAt(0).toUpperCase() + name.slice(1);
     let allSessionIds: string[] = [];
     this.players.forEach(player => {
       player.addNewCommanderDamageCounter(sessionId);
       allSessionIds.push(player.sessionId);
     })
 
-    this.players.set(sessionId, new Player(sessionId, name));
+    this.players.set(sessionId, new Player(sessionId,name ));
     allSessionIds.forEach(oldPlayerId => {
       this.players.get(sessionId).addNewCommanderDamageCounter(oldPlayerId);
     })
@@ -193,6 +200,13 @@ export class GameState extends Schema {
     generateServerMessage(this.players.get(sessionId).name + " shuffled", this.room)
   }
 
+  startTurn(sessionId: string){
+    this.untapAll(sessionId);
+    generateServerMessage(this.players.get(sessionId).name + " started their turn", this.room)
+    this.cardDraw(sessionId,{amount:1})
+    this.playerClaimedTurn(sessionId);
+  }
+
   untapAll(sessionId: string) {
     this.players.get(sessionId).untapAll();
   }
@@ -217,6 +231,16 @@ export class GameState extends Schema {
       this.players.get(sessionId).isCurrentTurn = false;
       this.incrementPlayerTurnIndex();
       this.players.get(this.playerIdsInTurnOrder[this.indexOfPlayersTurn]).isCurrentTurn = true;
+      generateServerMessage(this.players.get(sessionId).name + " ended their turn", this.room)
+    }
+  }
+
+  playerClaimedTurn(sessionId:string){
+    if(this.playerIdsInTurnOrder[this.indexOfPlayersTurn] != sessionId){
+      this.players.get(this.playerIdsInTurnOrder[this.indexOfPlayersTurn]).isCurrentTurn = false;
+      let index = this.playerIdsInTurnOrder.findIndex(id=> id==sessionId);
+      this.indexOfPlayersTurn = index;
+      this.players.get(sessionId).isCurrentTurn = true;
     }
   }
 

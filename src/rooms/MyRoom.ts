@@ -6,6 +6,8 @@ export class MyRoom extends Room {
 
   // roomId:string;
 
+  maxPlayerCount:number = 8;
+
   constructor(options:any){
     super(options)
     
@@ -74,6 +76,10 @@ export class MyRoom extends Room {
       this.state.shuffleDeck(client.sessionId);
     })
 
+    this.onMessage("startTurn", (client, message) => {
+      this.state.startTurn(client.sessionId);
+    })
+
     this.onMessage("untapAll", (client, message) => {
       this.state.untapAll(client.sessionId);
     })
@@ -92,10 +98,9 @@ export class MyRoom extends Room {
 
   }
 
-  // onAuth(client:any, options:any, request:any) {
-  //   console.log("Requesting: ",options)
-  //   return this.roomId === options.roomId;
-  // }
+  onAuth(client:any, options:any, request:any) {
+    return this.state.canAddMorePlayers(this.maxPlayerCount);
+  }
 
   onJoin(client: Client, options: any) {
     // console.log("onJoin",client,options)
