@@ -49,16 +49,11 @@ export class Player extends Schema {
     }
 
     addNothing = async () => {
-        let card = await this.cardStorage.CreateCard(this.sessionId, null);
-        this.deck.addCard(card, { amount: 1, fromTop: false })
-        card = await this.cardStorage.CreateCard(this.sessionId, null);
-        this.deck.addCard(card, { amount: 1, fromTop: false })
-        card = await this.cardStorage.CreateCard(this.sessionId, null);
-        this.deck.addCard(card, { amount: 1, fromTop: false })
-        card = await this.cardStorage.CreateCard(this.sessionId, null);
-        this.deck.addCard(card, { amount: 1, fromTop: false })
-        card = await this.cardStorage.CreateCard(this.sessionId, null);
-        this.deck.addCard(card, { amount: 1, fromTop: false })
+        let card = null;
+        for(let x = 0; x < 10;x++){
+            card = await this.cardStorage.CreateCard(this.sessionId, null);
+            this.deck.addCard(card, { amount: 1, fromTop: false })
+        }
     }
 
 
