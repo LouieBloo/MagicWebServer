@@ -1,7 +1,7 @@
 import { Schema, type, MapSchema } from "@colyseus/schema";
 import { Player } from './PlayerSchema';
 import { Card, CardLocation } from "./CardSchema";
-import { BattlefieldRowType } from "./BattlefieldRowSchema";
+import { BattlefieldRowType, BattlefieldRow } from "./BattlefieldRowSchema";
 import { CardStorage } from "../../cards/cardStorage";
 import { Counter, CounterTypes } from "./CounterSchema";
 import { Stack } from "./StackSchema";
@@ -85,6 +85,10 @@ export class GameState extends Schema {
       card = await this.players.get(sessionId).cardStorage.CreateCard(sessionId, inputCard.disc_id);
     } else {
       card = this.players.get(sessionId).cardStorage.GetRealSchemaCard(inputCard.id);
+      if(!card && inputCard.location == CardLocation.Stack){
+        card = inputCard;
+        newLocation = CardLocation.Trash;
+      }
     }
 
     let playerWithCardAfterMove = owner || sessionId;
@@ -145,7 +149,7 @@ export class GameState extends Schema {
       this.unAttachAllCardsFromCard(playerWithCardBeforeMove, card, removedCardType);
     }
 
-    if (newLocation != CardLocation.Battlefield && newLocation != CardLocation.AttachedToCard && newLocation != CardLocation.Stack) {
+    if (newLocation != CardLocation.Battlefield && newLocation != CardLocation.AttachedToCard && newLocation != CardLocation.Stack && card.wipeCounters) {
       card.wipeCounters();
       card.resetFlip();
     }
