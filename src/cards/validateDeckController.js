@@ -10,18 +10,15 @@ module.exports.handler = async (req, res, next) => {
   let mainDeck = await parseLines(req.validParams.deck);
   let errors = [];
   errors = errors.concat(mainDeck.errors);
-  let commanderDeck = null;
-  if (req.validParams.commander) {
-    commanderDeck = await parseLines(req.validParams.commander)
-    errors = errors.concat(commanderDeck.errors);
-  }
-  return { status: 200, response: { errors: errors, deck: mainDeck.deck, commander: commanderDeck ? commanderDeck.deck : null } }
+
+  return { status: 200, response: { errors: errors, deck: mainDeck.deck, commander: mainDeck.commanders ? mainDeck.commanders : null } }
 }
 
 
 const parseLines = async (lines) => {
   let splitDeck = lines.split(/\r?\n/);
   let deck = [];
+  let commanders = [];
   let errors = [];
 
   for (let x = 0; x < splitDeck.length; x++) {
@@ -40,9 +37,13 @@ const parseLines = async (lines) => {
     }
 
     let cardName = targetLine.split(/ (.+)/)[1];
+    let isACommander = false;
     if (!cardName) {
-      errors.push("No name for: " + targetLine)
+      //errors.push("No name for: " + targetLine)
       continue;
+    } else if (cardName.endsWith('*')) {
+      isACommander = true;
+      cardName = cardName.substring(0, cardName.length - 1);
     }
     // console.log(amount + ": " + cardName);
 
@@ -57,8 +58,13 @@ const parseLines = async (lines) => {
       }
     }
 
-    deck.push({ card: foundCard, amount: amount })
+
+    if (isACommander) {
+      commanders.push({ card: foundCard, amount: amount })
+    } else {
+      deck.push({ card: foundCard, amount: amount })
+    }
   }
 
-  return ({ deck: deck, errors: errors });
+  return ({ deck: deck, commanders: commanders, errors: errors });
 }
